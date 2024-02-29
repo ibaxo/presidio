@@ -15,6 +15,7 @@ spacy-huggingface-pipelines = "*"
 azure-ai-textanalytics = "*"
 azure-core = "*"
 python-dotenv = "*"
+vllm = "*"
 # stanza = "*"
 # spacy-stanza = "*"
 
