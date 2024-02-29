@@ -1,6 +1,6 @@
 [[source]]
 url = "https://pypi.python.org/simple"
-verify_ssl = true
+verify_ssl = false
 name = "pypi"
 
 [packages]
@@ -14,6 +14,7 @@ typing-extensions = "*"
 spacy-huggingface-pipelines = "*"
 azure-ai-textanalytics = "*"
 azure-core = "*"
+python-dotenv = "*"
 # stanza = "*"
 # spacy-stanza = "*"
 
@@ -24,4 +25,3 @@ flake8= {version = ">=3.7.9"}
 pep8-naming = "*"
 flake8-docstrings = "*"
 pre_commit = "*"
-python-dotenv = "*"

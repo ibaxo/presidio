@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+from dotenv import load_dotenv
 from logging.config import fileConfig
 from pathlib import Path
 from typing import Tuple
@@ -11,10 +12,13 @@ from werkzeug.exceptions import HTTPException
 
 from presidio_analyzer.analyzer_engine import AnalyzerEngine
 from presidio_analyzer.analyzer_request import AnalyzerRequest
+from presidio_analyzer import RecognizerRegistry
 
 DEFAULT_PORT = "3000"
 
 LOGGING_CONF_FILE = "logging.ini"
+
+RECOGNIZERS_YAML_PATH = "./recognizers.yaml"
 
 WELCOME_MESSAGE = r"""
  _______  _______  _______  _______ _________ ______  _________ _______
@@ -27,6 +31,8 @@ WELCOME_MESSAGE = r"""
 |/       |/   \__/(_______/\_______)\_______/(______/ \_______/(_______)
 """
 
+load_dotenv()
+PRESIDIO_REMOVE_RECOGNIZER = os.getenv("PRESIDIO_REMOVE_RECOGNIZER", None)
 
 class Server:
     """HTTP Server for calling Presidio Analyzer."""
@@ -37,8 +43,19 @@ class Server:
         self.logger.setLevel(os.environ.get("LOG_LEVEL", self.logger.level))
         self.app = Flask(__name__)
         self.logger.info("Starting analyzer engine")
-        self.engine = AnalyzerEngine()
         self.logger.info(WELCOME_MESSAGE)
+
+        registry = RecognizerRegistry()
+        if os.path.isfile(RECOGNIZERS_YAML_PATH):
+            self.logger.info(f"Loading recognizers from '{RECOGNIZERS_YAML_PATH}'")
+            registry.add_recognizers_from_yaml(RECOGNIZERS_YAML_PATH)
+
+        self.engine = AnalyzerEngine(registry=registry)
+
+        if not PRESIDIO_REMOVE_RECOGNIZER:
+            self.logger.info(f"PRESIDIO_REMOVE_RECOGNIZER = '{PRESIDIO_REMOVE_RECOGNIZER}'")
+            for recognizer_name in PRESIDIO_REMOVE_RECOGNIZER.split(','):
+                registry.remove_recognizer(recognizer_name.strip())
 
         @self.app.route("/health")
         def health() -> str:
